@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 	"telegramBotInstaller/internal/bot"
-	"telegramBotInstaller/internal/utils"
+	"telegramBotInstaller/internal/config"
 	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
 )
@@ -20,6 +20,6 @@ func init() {
 }
 
 func main() {
-	cfg := utils.LoadFromEnv()
+	cfg := config.LoadFromEnv()
 	bot.StartBot(cfg)
 }
