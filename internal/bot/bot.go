@@ -1,12 +1,10 @@
 package bot
 
 import (
-	"path/filepath"
 	"strings"
 	"telegramBotInstaller/internal/config"
 	"telegramBotInstaller/internal/services"
 	"telegramBotInstaller/internal/utils"
-	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	log "github.com/sirupsen/logrus"
@@ -35,11 +33,11 @@ func StartBot(cfg config.TokenCFG) {
 				msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, GetHelpMessage())
 				if _, err := bot.Send(msg); err != nil {
 					log.Printf("❌ Ошибка при отправке сообщения: %v", err)
-				}				
+				}
 				callback := tgbotapi.NewCallback(update.CallbackQuery.ID, "")
 				if _, err := bot.Request(callback); err != nil {
 					log.Printf("❌ Ошибка при выполнении callback: %v", err)
-				}				
+				}
 			}
 			continue
 		}
@@ -51,7 +49,7 @@ func StartBot(cfg config.TokenCFG) {
 		username := update.Message.From.FirstName + " " + update.Message.From.LastName
 		log.Infof("[%s] %s", username, update.Message.Text)
 
-		userText := strings.ToLower(update.Message.Text)
+		userText := update.Message.Text
 
 		if update.Message.Video != nil && update.Message.Video.MimeType == "video/mp4" {
 			videoFileID := update.Message.Video.FileID
@@ -63,41 +61,32 @@ func StartBot(cfg config.TokenCFG) {
 				continue
 			}
 
-			_, err = services.ConvertMp4ToMp3WithID(videoPath, cfg.OutputDir, videoFileID)
-			if err != nil {
-				SendMessage(update, "❌ Conversion error", bot)
-				log.Fatal(err)
-				continue
-			}
-
-			audioPath := filepath.Join(cfg.OutputDir, videoFileID+".mp3")
-			audioFile := tgbotapi.NewAudio(update.Message.Chat.ID, tgbotapi.FilePath(audioPath))
-			if _, err := bot.Send(audioFile); err != nil {
-				log.Printf("❌ Ошибка при отправке аудио: %v", err)
-			}			
-			time.Sleep(time.Second*10)
-			
-			if err := utils.DeleteFile(videoPath); err != nil {
-				log.Errorf("❌ Failed to delete video file: %v", err)
-			} else {
-				log.Infof("✅ Video file deleted: %s", videoPath)
-			}
-
-			if err := utils.DeleteFile(audioPath); err != nil {
-				log.Errorf("❌ Failed to delete MP3 file: %v", err)
-			} else {
-				log.Infof("✅ MP3 file deleted: %s", videoPath)
-			}
+			ProcessAndSendAudio(bot, update, videoPath, videoFileID, cfg.OutputDir)
 			continue
 		}
 
 		if utils.IsYoutubeURL(userText) {
-			reply := "📺 Got YouTube link! Processing..."
-			SendMessage(update, reply, bot)
+			videoID, err := utils.ExtractVideoID(userText)
+			if err != nil {
+				SendMessage(update, "❌ Это не ссылка на видео YouTube", bot)
+				continue
+			}
+
+			SendMessage(update, "📺 YouTube ссылка получена! Скачиваю...", bot)
+
+			videoPath, err := services.DownloadYouTubeVideo(userText, cfg.DownloadDir)
+			if err != nil {
+				SendMessage(update, "❌ Ошибка при скачивании YouTube видео", bot)
+				log.Printf("❌ Ошибка загрузки: %v", err)
+				continue
+			}
+
+			ProcessAndSendAudio(bot, update, videoPath, videoID, cfg.OutputDir)
 			continue
 		}
 
-		switch userText {
+		userTextLower := strings.ToLower(userText)
+		switch userTextLower {
 		case "/start":
 			reply := "Hello, " + username + "! Welcome 👋\n\nTo see what I can do, press the button below or type /help"
 			helpButton := tgbotapi.NewInlineKeyboardButtonData("🆘 Help", "/help")
