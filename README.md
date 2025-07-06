@@ -18,7 +18,7 @@
 - **Telegram Bot API** — интеграция с Telegram
 - **FFmpeg** — обработка и конвертация медиа
 - **Logrus** — мощное логирование
-- **goroutines & worker pool** — многопоточность
+- **goroutines** — многопоточность
 - **envconfig** — конфигурация через `.env`
 - **Docker & Docker Compose** — контейнеризация
 - **GitHub Actions** — CI/CD
