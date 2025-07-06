@@ -9,15 +9,21 @@ import (
 )
 
 func init() {
-	log.SetFormatter(&log.JSONFormatter{})
-	log.SetOutput(os.Stdout)
-	log.SetLevel(log.WarnLevel)
+	// Формат логов: можно JSON или красивый текст
+	log.SetFormatter(&log.TextFormatter{
+		FullTimestamp: true,
+		ForceColors:   true, 
+	})
 
-	err := godotenv.Load()
-	if err != nil {
-		log.Warn("Не удалось загрузить .env файл:", err)
+	log.SetOutput(os.Stdout)
+
+	log.SetLevel(log.DebugLevel)
+
+	if err := godotenv.Load(); err != nil {
+		log.Warnf("❗ Не удалось загрузить .env файл: %v", err)
 	}
 }
+
 
 func main() {
 	cfg := config.LoadFromEnv()
