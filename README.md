@@ -46,8 +46,10 @@
 
 ```bash
 git clone https://github.com/YourUsername/telegramBot-installervideo.git
-cd telegramBot-installervideo
+cd telegramBot-installervideo  
+```
 
+---
 
 ### 2️⃣ Сборка и запуск через Makefile
 
@@ -62,7 +64,7 @@ make deploy       # CI/CD деплой
 
 ```bash
 docker-compose up --build -d
-
+```
 
 ---
 
