@@ -33,9 +33,13 @@ func StartBot(cfg config.TokenCFG) {
 		if update.CallbackQuery != nil {
 			if update.CallbackQuery.Data == "/help" {
 				msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, GetHelpMessage())
-				bot.Send(msg)
+				if _, err := bot.Send(msg); err != nil {
+					log.Printf("❌ Ошибка при отправке сообщения: %v", err)
+				}				
 				callback := tgbotapi.NewCallback(update.CallbackQuery.ID, "")
-				bot.Request(callback)
+				if _, err := bot.Request(callback); err != nil {
+					log.Printf("❌ Ошибка при выполнении callback: %v", err)
+				}				
 			}
 			continue
 		}
@@ -68,7 +72,9 @@ func StartBot(cfg config.TokenCFG) {
 
 			audioPath := filepath.Join(cfg.OutputDir, videoFileID+".mp3")
 			audioFile := tgbotapi.NewAudio(update.Message.Chat.ID, tgbotapi.FilePath(audioPath))
-			bot.Send(audioFile)
+			if _, err := bot.Send(audioFile); err != nil {
+				log.Printf("❌ Ошибка при отправке аудио: %v", err)
+			}			
 			time.Sleep(time.Second*10)
 			
 			if err := utils.DeleteFile(videoPath); err != nil {

@@ -1,6 +1,7 @@
 package bot
 
 import (
+	log "github.com/sirupsen/logrus"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
@@ -11,13 +12,17 @@ func SendMessageWithKeyboard(update tgbotapi.Update, reply string, bot *tgbotapi
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, reply)
 	msg.ReplyToMessageID = update.Message.MessageID
 	msg.ReplyMarkup = keyboard
-	bot.Send(msg)
+	if _, err := bot.Send(msg); err != nil {
+		log.Printf("❌ Ошибка при отправке сообщения: %v", err)
+	}	
 }
 
 func SendMessage(update tgbotapi.Update, reply string, bot *tgbotapi.BotAPI) {
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, reply)
 	msg.ReplyToMessageID = update.Message.MessageID
-	bot.Send(msg)
+	if _, err := bot.Send(msg); err != nil {
+		log.Printf("❌ Ошибка при отправке сообщения: %v", err)
+	}	
 }
 
 func GetHelpMessage() string {
