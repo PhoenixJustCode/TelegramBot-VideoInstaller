@@ -1,16 +1,20 @@
-.PHONY: build run clean lint
+.PHONY: build run clean lint deploy
+
+IMAGE_NAME=telegram-bot-video
+CONTAINER_NAME=telegram-bot-video-installer
 
 build:
-	go build -o main.exe cmd/main.go
+	docker build -t $(IMAGE_NAME) .
 
 run: build
-	./main.exe
+	docker run --rm --name $(CONTAINER_NAME) --env-file .env $(IMAGE_NAME)
 
 clean:
-	del /f main.exe
+	docker rmi -f $(IMAGE_NAME) || true
 
 lint:
 	go vet ./...
 	golangci-lint run ./...
 
-make deploy #for future deploy integration
+# deploy:
+
