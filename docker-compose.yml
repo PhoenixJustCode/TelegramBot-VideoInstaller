@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  bot-app:
+    build: ./
+    container_name: telegram-bot-video-installer
+    restart: unless-stopped
+
+    volumes:
+      - .:/app
+
+    env_file:
+      - .env
+
+    command: ["./bot-app"]
