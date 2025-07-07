@@ -20,7 +20,7 @@ func StartBot(cfg config.TokenCFG) {
 		log.Panic(err)
 	}
 
-	bot.Debug = true
+	bot.Debug = false
 	log.Printf("✅ Authorized as %s", bot.Self.UserName)
 
 	u := tgbotapi.NewUpdate(0)
