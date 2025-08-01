@@ -7,7 +7,7 @@ WORKDIR /app
 COPY . .
 
 RUN go mod download
-RUN go build -o bot-app ./cmd/main.go
+RUN go build -o bot-app ./cmd
 
 
 
